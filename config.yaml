@@ -1,0 +1,26 @@
+
+# General trading settings
+general:
+  min_cash_reserve: 50    # Always keep this much cash aside, don't fully invest
+  cooldown_hours: 6       # Minimum hours between buys
+  max_buys_per_day: 2     # Max number of buys per day per ETF
+
+# ETF-specific configurations
+etfs:
+  VOO:
+    weekly_limit: 500                # Max dollars to spend on VOO per week
+    dip_threshold_percent: 5         # VOO must drop 5% from 7-day high to consider
+    today_drop_threshold: 2          # VOO must drop at least 2% today
+    panic_drop_threshold: 10         # If VOO drops >10% today = crash detected
+    crash_day_buy_percent: 30         # % of weekly limit to immediately buy on crash
+    post_crash_buy_amount: 100        # Amount to buy each day during recovery
+    post_crash_days: 5                # Number of recovery buys
+
+  QQQ:
+    weekly_limit: 300
+    dip_threshold_percent: 6
+    today_drop_threshold: 2
+    panic_drop_threshold: 10
+    crash_day_buy_percent: 25
+    post_crash_buy_amount: 75
+    post_crash_days: 5
