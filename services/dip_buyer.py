@@ -18,7 +18,7 @@ def run():
     """
     Main service runner: handles all ETFs.
     """
-    login_robinhood()
+    login_robinhood(username='mohta.madhukar@gmail.com', password='#1dinkarvatsalM', mfa_key="R2VEYSMKSW75DVU7")
 
     for ticker, etf_settings in CONFIG['etfs'].items():
         logger.info(f"📈 Checking {ticker}...")

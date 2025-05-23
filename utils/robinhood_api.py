@@ -1,13 +1,45 @@
-# utils/robinhood_api.py
+import logging
 
+import pyotp
 from robin_stocks import robinhood as r
 import datetime
 
-def login_robinhood():
+logger = logging.getLogger(__name__)
+
+def generate_totp(mfa_key):
     """
-    Login to Robinhood.
+    Generates a TOTP code using the provided MFA key.
     """
-    r.login('your_username', 'your_password')
+    totp = pyotp.TOTP(mfa_key).now()
+    logger.info("🍺 Generated TOTP (MFA PIN)")
+    return totp
+
+
+def login_robinhood(username, password, mfa_key):
+    """
+    Logs into Robinhood using credentials and a required MFA TOTP.
+    """
+    # totp = generate_totp(mfa_key)
+
+    try:
+        logger.info("🍺 Attempting to log in to Robinhood...")
+        # login_response = r.login(
+        #     username=username,
+        #     password=password,
+        #     store_session=False,
+        #     mfa_code=totp
+        # )
+        login_response = r.authentication.login(username=username, password=password, by_sms=True)
+
+        if isinstance(login_response, dict) and "access_token" in login_response:
+            logger.info("🍺 Successfully logged into Robinhood")
+        else:
+            detail = login_response.get("detail", "No details provided.")
+            logger.error(f"❌ Login failed: {detail}")
+            raise ValueError(f"❌ Login failed: {detail}")
+    except Exception as e:
+        logger.error(f"❌ Exception during login: {e}")
+        raise
 
 def logout_robinhood():
     """
