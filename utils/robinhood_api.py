@@ -19,17 +19,15 @@ def login_robinhood(username, password, mfa_key):
     """
     Logs into Robinhood using credentials and a required MFA TOTP.
     """
-    # totp = generate_totp(mfa_key)
-
     try:
         logger.info("🍺 Attempting to log in to Robinhood...")
-        # login_response = r.login(
-        #     username=username,
-        #     password=password,
-        #     store_session=False,
-        #     mfa_code=totp
-        # )
-        login_response = r.authentication.login(username=username, password=password, by_sms=True)
+        totp = generate_totp(mfa_key)
+        login_response = r.login(
+            username=username,
+            password=password,
+            # store_session=False,
+            mfa_code=totp
+        )
 
         if isinstance(login_response, dict) and "access_token" in login_response:
             logger.info("🍺 Successfully logged into Robinhood")
