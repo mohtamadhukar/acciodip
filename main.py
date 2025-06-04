@@ -13,7 +13,7 @@ logging.basicConfig(
 
 def main():
     """
-    Main entry point to run dip buying bot.
+    Main entry point to run dip buying bot
     """
     dip_buyer.run()
 
