@@ -1,5 +1,3 @@
-# services/dip_buyer.py
-
 """
 Unified Dip Buyer
 Handles dip detection, crash detection, and post-crash staged buying for all ETFs.
@@ -18,16 +16,16 @@ def run():
     """
     Main service runner: handles all ETFs.
     """
-    login_robinhood(username='mohta.madhukar@gmail.com', password='#1dinkarvatsalM', mfa_key="R2VEYSMKSW75DVU7")
+    # login_robinhood(username='mohta.madhukar@gmail.com', password='#1dinkarvatsalM', mfa_key="R2VEYSMKSW75DVU7")
 
     for ticker, etf_settings in CONFIG['etfs'].items():
         logger.info(f"📈 Checking {ticker}...")
 
+        dip_percent, today_change_percent = check_dip(ticker)
+        
         cash = get_cash_balance()
         current_week_spend = get_weekly_spent(ticker)
-        dip_percent, today_change_percent = check_dip(ticker)
         recent_orders = get_recent_orders(ticker)
-
         # Check if crash detected
         if today_change_percent <= -etf_settings['panic_drop_threshold']:
             logger.warning(f"🚨 Crash detected for {ticker} ({today_change_percent:.2f}% drop)!")

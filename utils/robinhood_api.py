@@ -25,8 +25,9 @@ def login_robinhood(username, password, mfa_key):
         login_response = r.login(
             username=username,
             password=password,
+            # by_sms=True,
             # store_session=False,
-            mfa_code=totp
+            # mfa_code=totp
         )
 
         if isinstance(login_response, dict) and "access_token" in login_response:

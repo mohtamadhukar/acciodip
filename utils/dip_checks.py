@@ -1,17 +1,23 @@
 # utils/dip_checks.py
 
-from robin_stocks import robinhood as r
+import yfinance as yf
+from datetime import datetime, timedelta
 
 def get_historical_prices(ticker):
-    return r.stocks.get_stock_historicals(ticker, interval='day', span='week')
+    # Get data for the last week
+    stock = yf.Ticker(ticker)
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=7)
+    historical = stock.history(start=start_date, end=end_date, interval='1d')
+    return historical
 
 def check_dip(ticker):
     historical = get_historical_prices(ticker)
-    highs = [float(day['high_price']) for day in historical]
+    highs = historical['High'].tolist()
     highest = max(highs)
 
-    today_close = float(historical[-1]['close_price'])
-    yesterday_close = float(historical[-2]['close_price'])
+    today_close = historical['Close'].iloc[-1]
+    yesterday_close = historical['Close'].iloc[-2]
     today_change_percent = (today_close - yesterday_close) / yesterday_close * 100
     dip_percent = (highest - today_close) / highest * 100
 
