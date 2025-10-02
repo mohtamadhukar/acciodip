@@ -5,7 +5,7 @@ from typing import Dict
 
 from utils.config_loader import load_config
 from broker_robinhood import RobinhoodBroker
-from data_robinhood import get_historicals
+from data_robinhood import get_historicals, get_latest_price
 from rules import select_decision
 from state import insert_decision, upsert_event, get_event, has_decision, sum_spent
 from data_robinhood import get_quote, is_quote_stale
@@ -21,10 +21,12 @@ def _build_data_bundle(symbol: str) -> Dict:
     candles = get_historicals(symbol, span="week", interval="day")
     closes = [float(c.get("close_price", 0) or 0) for c in candles]
     highs = [float(c.get("high_price", 0) or 0) for c in candles]
+    latest_price = get_latest_price(symbol)
     data = {
         "candles": candles,
         "closes": closes,
         "highs": highs,
+        "latest_price": latest_price,
     }
     return data
 
@@ -44,7 +46,7 @@ def _place_and_record(broker: RobinhoodBroker, symbol: str, dollars: float, deci
         insert_decision(decision_row)
 
 
-def _run_once(mode: str) -> None:
+def _run_once(mode: str="rth") -> None:
     config = load_config()
     guardrails = (config or {}).get("guardrails", {})
     etfs = (config or {}).get("etfs", {}) or {}
@@ -167,7 +169,6 @@ def _run_once(mode: str) -> None:
 
 def run_rth() -> None:
     _run_once("rth")
-
 
 def run_drip() -> None:
     _run_once("post_crash_drip")

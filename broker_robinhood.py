@@ -25,7 +25,7 @@ class RobinhoodBroker:
         r.logout()
 
     def get_cash_balance(self) -> float:
-        profile = r.profiles.load_account_profile()
+        profile = r.profiles.load_account_profile(account_number=os.getenv("RH_ACCOUNT_NUMBER"))
         return float(profile.get("portfolio_cash", 0) or 0)
 
     def get_latest_price(self, symbol: str) -> float:
@@ -38,6 +38,6 @@ class RobinhoodBroker:
         last = self.get_latest_price(symbol)
         limit_price = round(last * (1 + self.limit_band_bps / 10000), 2)
         qty = max(0.0001, round(dollars / limit_price, 6))
-        return r.orders.order_buy_limit(symbol, qty, limit_price)
+        return r.orders.order_buy_limit(symbol=symbol, quantity=qty, limitPrice=limit_price, account_number=os.getenv("RH_ACCOUNT_NUMBER"))
 
 

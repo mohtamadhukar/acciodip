@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from state import init_db
 from measure import run_weekly_measurement
 from backtest import run_backtest
-from runner import run_rth, run_drip, run_eod
+from runner import run_drip, run_eod, run_rth
 
 # Setup logging
 logging.basicConfig(
@@ -65,22 +65,13 @@ def main():
             run_drip()
             return
 
-        # # RTH: regular trading hours excluding open rush and EOD window (09:45-15:45 ET)
-        # if is_weekday and between(9, 45, 15, 45):
-        #     run_rth()
-        #     return
+        run_rth()
+            
 
-        # Fallbacks: if weekday before open, prefer drip once; otherwise no-op via finalize window
-        if is_weekday and between(9, 0, 9, 45):
-            run_drip()
-            return
         # If nothing matched (weekends/overnight), do nothing gracefully
         logging.info("Auto mode: outside trading windows; no action taken.")
         return
 
-    # if args.mode == "rth":
-    #     run_rth()
-    #     return
     if args.mode == "post_crash_drip":
         run_drip()
         return

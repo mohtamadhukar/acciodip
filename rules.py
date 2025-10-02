@@ -40,8 +40,8 @@ def evaluate_crash(symbol: str, config: Dict, data: Dict) -> Optional[RuleDecisi
     closes = data.get("closes", [])
     if len(closes) < 2:
         return None
-    prev_close = closes[-2]
-    today_close = closes[-1]
+    prev_close = closes[-1]
+    today_close = data.get("latest_price")
     if prev_close <= 0:
         return None
     drop = (today_close - prev_close) / prev_close
@@ -117,8 +117,8 @@ def evaluate_normal(symbol: str, config: Dict, data: Dict) -> Optional[RuleDecis
     closes = data.get("closes", [])
     if len(closes) < 2 or not highs:
         return None
-    today_close = closes[-1]
-    prev_close = closes[-2]
+    today_close = data.get("latest_price")
+    prev_close = closes[-1]
     if prev_close <= 0:
         return None
     same_day_drop = (today_close - prev_close) / prev_close

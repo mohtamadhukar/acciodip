@@ -29,6 +29,9 @@ def get_historicals(symbol: str, span: str = "week", interval: str = "day") -> L
     data = r.stocks.get_stock_historicals(symbol, interval=interval, span=span, bounds='regular')
     return data or []
 
+def get_latest_price(symbol: str) -> float:
+    price = r.stocks.get_latest_price(symbol)
+    return float(price[0]) if price else 0.0
 
 def compute_recent_peak_close(closes: List[float]) -> float:
     return max(closes) if closes else 0.0
