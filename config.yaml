@@ -1,26 +1,31 @@
 
-# General trading settings
-general:
-  min_cash_reserve: 50    # Always keep this much cash aside, don't fully invest
-  cooldown_hours: 6       # Minimum hours between buys
-  max_buys_per_day: 2     # Max number of buys per day per ETF
+guardrails:
+  data_stale_max: "3m"
+  order_limit_band_bps: 20
+  min_trade: 10
+  max_trade: 50
+  aggregate_limits:
+    weekly_total_cap: 50
+    monthly_total_cap: 200
 
-# ETF-specific configurations
 etfs:
   VOO:
-    weekly_limit: 500                # Max dollars to spend on VOO per week
-    dip_threshold_percent: 5         # VOO must drop 5% from 7-day high to consider
-    today_drop_threshold: 2          # VOO must drop at least 2% today
-    panic_drop_threshold: 10         # If VOO drops >10% today = crash detected
-    crash_day_buy_percent: 30         # % of weekly limit to immediately buy on crash
-    post_crash_buy_amount: 100        # Amount to buy each day during recovery
-    post_crash_days: 5                # Number of recovery buys
-
-  QQQ:
-    weekly_limit: 300
-    dip_threshold_percent: 6
-    today_drop_threshold: 2
-    panic_drop_threshold: 10
-    crash_day_buy_percent: 25
-    post_crash_buy_amount: 75
-    post_crash_days: 5
+    enabled: true
+    budgets:
+      weekly_cap: 50
+      monthly_cap: 200
+      cash_reserve_floor: 0.20
+    strategy:
+      crash:
+        panic_threshold: 0.10
+        crash_deploy_pct: 0.40
+        post_crash_days: 5
+        post_crash_total_cap: 0.30
+      normal:
+        normal_one_day: 0.03
+        cumulative: 0.05
+        same_day_min: 0.01
+    measurement:
+      dca_weekly_cap: 50
+      dca_buy_day: "MON"
+      dca_buy_time: "09:00"

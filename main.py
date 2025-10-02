@@ -1,5 +1,14 @@
 import logging
-from services import dip_buyer
+import argparse
+import os
+from datetime import datetime, time
+from zoneinfo import ZoneInfo
+from dotenv import load_dotenv
+
+from state import init_db
+from measure import run_weekly_measurement
+from backtest import run_backtest
+from runner import run_rth, run_drip, run_eod
 
 # Setup logging
 logging.basicConfig(
@@ -15,7 +24,69 @@ def main():
     """
     Main entry point to run dip buying bot
     """
-    dip_buyer.run()
+    parser = argparse.ArgumentParser(description="Dip-Buying Bot")
+    parser.add_argument(
+        "--mode",
+        required=False,
+        default="auto",
+        choices=["auto", "rth", "drip", "eod", "measure", "backtest"],
+        help="Run mode (default: auto)"
+    )
+    args = parser.parse_args()
+
+    load_dotenv()
+    init_db()
+
+    if args.mode == "measure":
+        run_weekly_measurement()
+        return
+
+    if args.mode == "backtest":
+        run_backtest()
+        return
+
+    if args.mode == "auto":
+        # Choose mode based on US/Eastern session windows
+        now_et = datetime.now(ZoneInfo("America/New_York"))
+        is_weekday = now_et.weekday() < 5  # 0=Mon .. 4=Fri
+
+        def between(start_h, start_m, end_h, end_m):
+            start = time(hour=start_h, minute=start_m)
+            end = time(hour=end_h, minute=end_m)
+            return start <= now_et.time() < end
+
+        # EOD window: last 15 minutes before close (approx 15:45-16:00 ET)
+        if is_weekday and between(15, 45, 16, 0):
+            run_eod()
+            return
+
+        # Drip window: midday single run (12:00-12:30 ET)
+        if is_weekday and between(12, 0, 12, 30):
+            run_drip()
+            return
+
+        # RTH: regular trading hours excluding open rush and EOD window (09:45-15:45 ET)
+        if is_weekday and between(9, 45, 15, 45):
+            run_rth()
+            return
+
+        # Fallbacks: if weekday before open, prefer drip once; otherwise no-op via finalize window
+        if is_weekday and between(9, 0, 9, 45):
+            run_drip()
+            return
+        # If nothing matched (weekends/overnight), do nothing gracefully
+        logging.info("Auto mode: outside trading windows; no action taken.")
+        return
+
+    if args.mode == "rth":
+        run_rth()
+        return
+    if args.mode == "drip":
+        run_drip()
+        return
+    if args.mode == "eod":
+        run_eod()
+        return
 
 if __name__ == "__main__":
     main()
