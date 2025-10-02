@@ -16,7 +16,7 @@ def run():
     """
     Main service runner: handles all ETFs.
     """
-    # login_robinhood(username='mohta.madhukar@gmail.com', password='#1dinkarvatsalM', mfa_key="R2VEYSMKSW75DVU7")
+    login_robinhood(username='mohta.madhukar@gmail.com', password='#1dinkarvatsalM')
 
     for ticker, etf_settings in CONFIG['etfs'].items():
         logger.info(f"📈 Checking {ticker}...")
@@ -26,20 +26,20 @@ def run():
         cash = get_cash_balance()
         current_week_spend = get_weekly_spent(ticker)
         recent_orders = get_recent_orders(ticker)
-        # Check if crash detected
-        if today_change_percent <= -etf_settings['panic_drop_threshold']:
-            logger.warning(f"🚨 Crash detected for {ticker} ({today_change_percent:.2f}% drop)!")
-            handle_crash_buy(ticker, etf_settings, cash, current_week_spend)
+        # # Check if crash detected
+        # if today_change_percent <= -etf_settings['panic_drop_threshold']:
+        #     logger.warning(f"🚨 Crash detected for {ticker} ({today_change_percent:.2f}% drop)!")
+        #     handle_crash_buy(ticker, etf_settings, cash, current_week_spend)
 
-        # Check if post-crash mode active
-        elif is_in_post_crash_mode(recent_orders, etf_settings):
-            logger.info(f"🛡️ Post-crash mode active for {ticker}. Doing staged buy.")
-            handle_post_crash_staged_buy(ticker, etf_settings, cash, current_week_spend)
+        # # Check if post-crash mode active
+        # elif is_in_post_crash_mode(recent_orders, etf_settings):
+        #     logger.info(f"🛡️ Post-crash mode active for {ticker}. Doing staged buy.")
+        #     handle_post_crash_staged_buy(ticker, etf_settings, cash, current_week_spend)
 
-        # Normal dip check
-        elif dip_percent >= etf_settings['dip_threshold_percent'] and today_change_percent <= -etf_settings['today_drop_threshold']:
-            logger.info(f"📉 Dip detected for {ticker} ({dip_percent:.2f}% from high).")
-            handle_normal_dip_buy(ticker, etf_settings, cash, current_week_spend)
+        # # Normal dip check
+        # elif dip_percent >= etf_settings['dip_threshold_percent'] and today_change_percent <= -etf_settings['today_drop_threshold']:
+        #     logger.info(f"📉 Dip detected for {ticker} ({dip_percent:.2f}% from high).")
+        #     handle_normal_dip_buy(ticker, etf_settings, cash, current_week_spend)
 
     logout_robinhood()
 

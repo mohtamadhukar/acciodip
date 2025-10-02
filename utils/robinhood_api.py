@@ -15,13 +15,13 @@ def generate_totp(mfa_key):
     return totp
 
 
-def login_robinhood(username, password, mfa_key):
+def login_robinhood(username, password, mfa_key=None):
     """
     Logs into Robinhood using credentials and a required MFA TOTP.
     """
     try:
         logger.info("🍺 Attempting to log in to Robinhood...")
-        totp = generate_totp(mfa_key)
+        # totp = generate_totp(mfa_key)
         login_response = r.login(
             username=username,
             password=password,
@@ -51,7 +51,7 @@ def get_cash_balance():
     Get available cash.
     """
     profile = r.profiles.load_account_profile()
-    return float(profile['buying_power'])
+    return float(profile['portfolio_cash'])
 
 def get_latest_price(ticker):
     """
@@ -97,3 +97,18 @@ def classify_order(order):
     Tag order type (normal or crash-day).
     """
     return 'crash_day_buy' if float(order['cumulative_notional']['amount']) > 300 else 'normal_buy'
+
+def get_stock_historicals(ticker, span='week', interval='day'):
+    """
+    Fetch historical OHLC data for a stock/ETF from Robinhood.
+
+    Args:
+        ticker: Symbol to fetch (e.g., 'VOO')
+        span: 'day' | 'week' | 'month' | 'year' | '5year' | 'all'
+        interval: '5minute' | '10minute' | 'hour' | 'day' | 'week'
+
+    Returns:
+        List of dicts with keys like: begins_at, open_price, close_price, high_price, low_price, volume
+    """
+    data = r.stocks.get_stock_historicals(ticker, interval=interval, span=span, bounds='regular')
+    return data or []
