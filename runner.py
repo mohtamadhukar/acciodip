@@ -56,28 +56,14 @@ def _run_once(mode: str) -> None:
 
     try:
         for symbol, etf_cfg in etfs.items():
-            # Staleness guardrail
-            stale_max = str(guardrails.get("data_stale_max", "3m"))
-            stale, last_ts = is_quote_stale(symbol, stale_max)
-            if stale:
-                row = {
-                    "idempotency_key": f"{datetime.now().strftime('%Y%m%d')}-normal-none",
-                    "ts": _now_iso(),
-                    "rule": "normal",
-                    "symbol": symbol,
-                    "dollars": 0.0,
-                    "status": "skipped",
-                    "reason": "Data stale",
-                    "reason_code": "DATA_STALE",
-                    "broker_order_id": None,
-                    "filled_qty": None,
-                    "filled_avg_price": None,
-                }
-                insert_decision(row)
-                continue
-
             data = _build_data_bundle(symbol)
-            decision = select_decision(symbol, etf_cfg.get("strategy", {}), {"mode": mode, **data})
+            strategy_cfg = etf_cfg.get("strategy", {})
+            decision = select_decision(
+                symbol=symbol, 
+                config=strategy_cfg, 
+                data=data,
+                mode=mode,
+            )
             if not decision:
                 continue
 
@@ -113,11 +99,27 @@ def _run_once(mode: str) -> None:
             weekly_cap_all = float(agg.get("weekly_total_cap", float('inf')))
             monthly_cap_all = float(agg.get("monthly_total_cap", float('inf')))
 
+            # Start with the dollars the rule *wanted* to invest for this trade
             dollars = float(decision.dollars)
+
+            # Apply budget guardrails in order:
+            # 1. Per-symbol weekly cap:
+            #    Don't spend more than this ETF's weekly_cap minus what’s already spent this week.
             dollars = min(dollars, max(0.0, weekly_cap_symbol - spent_week_symbol))
+
+            # 2. Global weekly cap (all ETFs combined):
+            #    Clamp to what’s left of the total weekly_cap across all ETFs.
             dollars = min(dollars, max(0.0, weekly_cap_all - spent_week_all))
+
+            # 3. Per-symbol monthly cap:
+            #    Clamp to what’s left of this ETF's monthly_cap after current month’s spend.
             dollars = min(dollars, max(0.0, monthly_cap_symbol - sum_spent(symbol, month_start.isoformat(), next_month.isoformat())))
+
+            # 4. Global monthly cap (all ETFs combined):
+            #    Finally, clamp to what’s left of the total monthly_cap across all ETFs.
             dollars = min(dollars, max(0.0, monthly_cap_all - spent_month_all))
+
+            # After all these checks, "dollars" is the FINAL trade size allowed,guaranteed not to breach weekly/monthly caps per ETF or across all ETFs.
 
             # Cash reserve floor
             cash = broker.get_cash_balance()
@@ -168,7 +170,7 @@ def run_rth() -> None:
 
 
 def run_drip() -> None:
-    _run_once("drip")
+    _run_once("post_crash_drip")
 
 
 def run_eod() -> None:

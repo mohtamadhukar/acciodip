@@ -15,7 +15,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("bot.log"),
+        # logging.FileHandler("bot.log"),
         logging.StreamHandler()
     ]
 )
@@ -29,7 +29,7 @@ def main():
         "--mode",
         required=False,
         default="auto",
-        choices=["auto", "rth", "drip", "eod", "measure", "backtest"],
+        choices=["auto", "post_crash_drip", "eod", "measure", "backtest"],
         help="Run mode (default: auto)"
     )
     args = parser.parse_args()
@@ -65,10 +65,10 @@ def main():
             run_drip()
             return
 
-        # RTH: regular trading hours excluding open rush and EOD window (09:45-15:45 ET)
-        if is_weekday and between(9, 45, 15, 45):
-            run_rth()
-            return
+        # # RTH: regular trading hours excluding open rush and EOD window (09:45-15:45 ET)
+        # if is_weekday and between(9, 45, 15, 45):
+        #     run_rth()
+        #     return
 
         # Fallbacks: if weekday before open, prefer drip once; otherwise no-op via finalize window
         if is_weekday and between(9, 0, 9, 45):
@@ -78,10 +78,10 @@ def main():
         logging.info("Auto mode: outside trading windows; no action taken.")
         return
 
-    if args.mode == "rth":
-        run_rth()
-        return
-    if args.mode == "drip":
+    # if args.mode == "rth":
+    #     run_rth()
+    #     return
+    if args.mode == "post_crash_drip":
         run_drip()
         return
     if args.mode == "eod":

@@ -1,31 +1,38 @@
 
+# =========================================
+# Global guardrails (apply to all ETFs)
+# =========================================
 guardrails:
-  data_stale_max: "3m"
-  order_limit_band_bps: 20
-  min_trade: 10
-  max_trade: 50
-  aggregate_limits:
-    weekly_total_cap: 50
-    monthly_total_cap: 200
+  data_stale_max: "3m"          # skip trades if quote older than this
+  order_limit_band_bps: 20      # buy limit up to +0.20% above last price
+  min_trade: 10                 # $ minimum per order
+  max_trade: 50                 # $ maximum per order
+  aggregate_limits:             # caps across all ETFs (optional)
+    weekly_total_cap: 50        # $ max spend across all ETFs per week
+    monthly_total_cap: 200      # $ max spend across all ETFs per month
 
+# =========================================
+# Per-ETF settings
+# =========================================
 etfs:
+
   VOO:
     enabled: true
     budgets:
-      weekly_cap: 50
-      monthly_cap: 200
-      cash_reserve_floor: 0.20
+      weekly_cap: 50            # $ max spend per week
+      monthly_cap: 200          # $ max spend per month
+      cash_reserve_floor: 0.20  # fraction of cash to keep (0.20 = 20%)
     strategy:
       crash:
-        panic_threshold: 0.10
-        crash_deploy_pct: 0.40
-        post_crash_days: 5
-        post_crash_total_cap: 0.30
+        panic_threshold: 0.10        # 10% drop in one day = crash
+        crash_deploy_pct: 0.40       # 40% of weekly budget on crash day
+        post_crash_days: 5           # number of drip days after crash
+        post_crash_total_cap: 0.30   # 30% of weekly budget for drips
       normal:
-        normal_one_day: 0.03
-        cumulative: 0.05
-        same_day_min: 0.01
+        normal_one_day: 0.03         # 3% daily drop triggers normal dip
+        cumulative: 0.05             # 5% from recent peak also qualifies
+        same_day_min: 0.01           # must drop at least 1% same day
     measurement:
-      dca_weekly_cap: 50
-      dca_buy_day: "MON"
-      dca_buy_time: "09:00"
+      dca_weekly_cap: 50             # $ to simulate weekly DCA
+      dca_buy_day: "MON"             # DCA buy day (MON..FRI)
+      dca_buy_time: "09:00"          # DCA buy time (HH:MM)
