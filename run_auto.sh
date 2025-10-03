@@ -55,6 +55,9 @@ fi
 
 log_message "Within trading hours ($current_time ET). Proceeding with bot execution."
 
+# Set up PATH for cron environment
+export PATH="/opt/homebrew/bin:/opt/homebrew/anaconda3/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
 # Check if conda is available
 if ! command -v conda &> /dev/null; then
     log_message "ERROR: conda command not found. Please ensure conda is installed and in PATH."
@@ -62,7 +65,7 @@ if ! command -v conda &> /dev/null; then
 fi
 
 # Initialize conda for bash (required for conda activate to work in scripts)
-eval "$(conda shell.bash hook)"
+eval "$(/opt/homebrew/bin/conda shell.bash hook)"
 
 # Activate the conda environment
 log_message "Activating conda environment 'acciodip'..."
