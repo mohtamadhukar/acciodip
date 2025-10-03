@@ -65,7 +65,10 @@ def main():
             run_drip()
             return
 
-        run_rth()
+        # RTH window: regular trading hours (09:45-15:45 ET)
+        if is_weekday and between(9, 45, 15, 45):
+            run_rth()
+            return
             
 
         # If nothing matched (weekends/overnight), do nothing gracefully
