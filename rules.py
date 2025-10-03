@@ -136,15 +136,19 @@ def evaluate_normal(symbol: str, config: Dict, data: Dict) -> Optional[RuleDecis
 def select_decision(symbol: str, config: Dict, data: Dict, mode: str) -> Optional[RuleDecision]:
     decision = evaluate_crash(symbol, config, data)
     if decision: 
+        logger.info(f"Crash decision: {decision.rule} for {symbol}")
         return decision
     if mode == "post_crash_drip":
         decision = evaluate_postcrash_drip(symbol, config, data)
         if decision: 
+            logger.info(f"Post-crash drip decision: {decision.rule} for {symbol}")
             return decision
     if mode == "eod":
         decision = evaluate_normal(symbol, config, data)
         if decision: 
+            logger.info(f"Normal decision: {decision.rule} for {symbol}")
             return decision
+    logger.info(f"No decision for {symbol}")
     return None
 
 
