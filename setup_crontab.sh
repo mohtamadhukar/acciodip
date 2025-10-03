@@ -28,18 +28,16 @@ TEMP_CRON=$(mktemp)
 # Get current crontab (if any) and filter out any existing entries for this script
 crontab -l 2>/dev/null | grep -v "$RUNNER_SCRIPT" > "$TEMP_CRON" || true
 
-# Add the new crontab entries
-# Run every 5 minutes during regular trading hours (9:30 AM - 4:00 PM ET, Monday-Friday)
-# Note: These times are in the system's local timezone. Adjust if your system is not in ET.
+# Add the new crontab entry
+# Run every 5 minutes during trading window (9:00 AM - 5:00 PM ET, Monday-Friday)
+# The script itself will check if it's within the precise 9:30 AM - 4:30 PM window
 cat >> "$TEMP_CRON" << EOF
 
-# Trading Bot - Run every 5 minutes during regular trading hours (9:30 AM - 4:00 PM ET, Mon-Fri)
-# Minutes: */5 (every 5 minutes)
-# Hours: 9-16 (9 AM to 4 PM, but we'll handle the 9:30 start in the script logic)
-# Day of month: * (every day)
-# Month: * (every month)
-# Day of week: 1-5 (Monday to Friday)
-*/5 9-16 * * 1-5 $RUNNER_SCRIPT
+# Set timezone to Eastern Time for trading hours
+TZ=America/New_York
+
+# Trading Bot - Run every 5 minutes during trading window (script handles 9:30 AM - 4:30 PM ET check)
+*/5 9-17 * * 1-5 $RUNNER_SCRIPT
 
 EOF
 
@@ -47,7 +45,8 @@ EOF
 if crontab "$TEMP_CRON"; then
     echo "Crontab installed successfully!"
     echo ""
-    echo "The trading bot will now run every 5 minutes during trading hours (9:30 AM - 4:00 PM ET, Mon-Fri)"
+    echo "The trading bot will now run every 5 minutes during trading hours (9:30 AM - 4:30 PM ET, Mon-Fri)"
+    echo "Timezone is enforced as America/New_York (Eastern Time) regardless of system timezone"
     echo ""
     echo "To view the current crontab:"
     echo "  crontab -l"

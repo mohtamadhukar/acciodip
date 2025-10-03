@@ -35,6 +35,26 @@ trap cleanup EXIT
 # Start logging
 log_message "Starting trading bot auto run..."
 
+# Check if we're within trading hours (9:30 AM - 4:30 PM ET)
+# Set timezone to Eastern Time for the check
+export TZ=America/New_York
+current_time=$(date +%H%M)
+current_day=$(date +%u)  # 1=Monday, 7=Sunday
+
+# Check if it's a weekday (1-5 = Monday-Friday)
+if [ "$current_day" -gt 5 ]; then
+    log_message "Outside trading hours: Weekend (day $current_day). Exiting."
+    exit 0
+fi
+
+# Check if we're within 9:30 AM (0930) to 4:30 PM (1630) ET
+if [ "$current_time" -lt 930 ] || [ "$current_time" -gt 1630 ]; then
+    log_message "Outside trading hours: Current time $current_time ET is not between 0930-1630. Exiting."
+    exit 0
+fi
+
+log_message "Within trading hours ($current_time ET). Proceeding with bot execution."
+
 # Check if conda is available
 if ! command -v conda &> /dev/null; then
     log_message "ERROR: conda command not found. Please ensure conda is installed and in PATH."

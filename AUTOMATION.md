@@ -47,7 +47,8 @@ crontab -l
 
 You should see an entry like:
 ```
-*/5 9-16 * * 1-5 /path/to/your/project/run_auto.sh
+TZ=America/New_York
+*/5 9-17 * * 1-5 /path/to/your/project/run_auto.sh
 ```
 
 ## Schedule Details
@@ -55,8 +56,12 @@ You should see an entry like:
 The bot runs:
 - **Frequency**: Every 5 minutes
 - **Days**: Monday through Friday (weekdays only)
-- **Hours**: 9:00 AM to 4:59 PM ET
-- **Note**: The bot's internal logic handles the 9:30 AM market open timing
+- **Hours**: 9:30 AM to 4:30 PM ET (precise market hours)
+- **Timezone**: Enforced as America/New_York (Eastern Time) regardless of system timezone
+- **Implementation**: 
+  - Cron runs every 5 minutes from 9:00 AM - 5:00 PM ET
+  - Script checks current time and only proceeds if between 9:30 AM - 4:30 PM ET
+  - Automatic weekend detection and early exit
 
 ## Logging
 
