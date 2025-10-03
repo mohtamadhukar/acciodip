@@ -36,8 +36,8 @@ cat >> "$TEMP_CRON" << EOF
 # Set timezone to Eastern Time for trading hours
 TZ=America/New_York
 
-# Trading Bot - Run every 5 minutes during trading window (script handles 9:30 AM - 4:30 PM ET check)
-*/5 9-17 * * 1-5 $RUNNER_SCRIPT
+# Trading Bot - Run every 25 minutes during trading window (script handles 9:30 AM - 4:30 PM ET check)
+*/25 9-17 * * 1-5 $RUNNER_SCRIPT
 
 EOF
 
@@ -45,7 +45,7 @@ EOF
 if crontab "$TEMP_CRON"; then
     echo "Crontab installed successfully!"
     echo ""
-    echo "The trading bot will now run every 5 minutes during trading hours (9:30 AM - 4:30 PM ET, Mon-Fri)"
+    echo "The trading bot will now run every 25 minutes during trading hours (9:30 AM - 4:30 PM ET, Mon-Fri)"
     echo "Timezone is enforced as America/New_York (Eastern Time) regardless of system timezone"
     echo ""
     echo "To view the current crontab:"
